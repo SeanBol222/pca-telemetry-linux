@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pca-telemetry"
+version = "0.1.0"
+description = "Dimensionality reduction of Linux server telemetry (sar/sysstat) with PCA."
+readme = "README.md"
+license = "GPL-3.0-or-later"
+authors = [{ name = "Sean Sebastian Bolivar Calderon" }]
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "scikit-learn>=1.4",
+    "matplotlib>=3.8",
+]
+
+[project.urls]
+Repository = "https://github.com/SeanBol222/pca-telemetry-linux"
+
+[tool.setuptools.packages.find]
+where = ["src"]
