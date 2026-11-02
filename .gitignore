@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Raw binary files from sar (sadc); only the exported CSV files are versioned
+data/raw/**/*.sa
+data/raw/**/sa[0-9]*
+
+# Editors and OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
