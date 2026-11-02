@@ -1,0 +1,16 @@
+# Python dependencies for the PCA proof of concept.
+# Install with: pip install -r requirements.txt
+
+# Numerical computing and data handling
+numpy>=1.26
+pandas>=2.2
+
+# PCA, scaling and baseline classifiers
+scikit-learn>=1.4
+
+# Figures for the notebook and the slides
+matplotlib>=3.8
+
+# Notebook environment
+jupyterlab>=4.0
+ipykernel>=6.29
