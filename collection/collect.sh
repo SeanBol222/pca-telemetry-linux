@@ -8,15 +8,15 @@
 # Usage:
 #   ./collect.sh [options] [scenario ...]
 #
-# Scenarios: reposo cpu memoria disco red (default: all, in that order)
+# Scenarios: idle cpu memory disk network (default: all, in that order)
 #
 # Options:
 #   -d SECONDS   duration of each scenario      (default: 1800)
 #   -i SECONDS   sampling interval of sar       (default: 1)
 #   -p SECONDS   pause between scenarios        (default: 60)
-#   -m PERCENT   memory used by "memoria"       (default: 75)
+#   -m PERCENT   memory used by "memory"       (default: 75)
 #   -o DIR       output directory               (default: <repo>/data/raw)
-#   -t DIR       scratch dir for "disco"; must be on a real disk, not tmpfs
+#   -t DIR       scratch dir for "disk"; must be on a real disk, not tmpfs
 #                                               (default: <repo>/.stress-tmp)
 #   -h           show this help
 #
@@ -37,7 +37,7 @@ PAUSE=60
 MEM_PERCENT=75
 OUTDIR="$REPO_ROOT/data/raw"
 DISK_TMP="$REPO_ROOT/.stress-tmp"
-ALL_SCENARIOS=(reposo cpu memoria disco red)
+ALL_SCENARIOS=(idle cpu memory disk network)
 
 usage() {
     sed -n '2,24p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
@@ -85,8 +85,8 @@ fi
 needs_stress=false
 for scenario in "${SCENARIOS[@]}"; do
     case "$scenario" in
-        reposo) ;;
-        cpu|memoria|disco|red) needs_stress=true ;;
+        idle) ;;
+        cpu|memory|disk|network) needs_stress=true ;;
         *) echo "Error: unknown scenario '$scenario'. Valid: ${ALL_SCENARIOS[*]}" >&2; exit 1 ;;
     esac
 done
@@ -106,7 +106,7 @@ mkdir -p "$OUTDIR"
 
 # The disk load needs persistent storage: on tmpfs (e.g. /tmp on Debian 13)
 # the writes stay in RAM and the disk metrics remain at zero.
-if [[ " ${SCENARIOS[*]} " == *" disco "* ]]; then
+if [[ " ${SCENARIOS[*]} " == *" disk "* ]]; then
     mkdir -p "$DISK_TMP"
     fstype="$(df --output=fstype "$DISK_TMP" | tail -n 1 | tr -d ' ')"
     if [[ "$fstype" == "tmpfs" || "$fstype" == "ramfs" ]]; then
@@ -153,11 +153,11 @@ save_specs() {
 run_load() {
     local scenario="$1"
     case "$scenario" in
-        reposo)  sleep "$DURATION" ;;
+        idle)    sleep "$DURATION" ;;
         cpu)     stress-ng --cpu 0 --timeout "${DURATION}s" --metrics-brief ;;
-        memoria) stress-ng --vm 1 --vm-bytes "${MEM_PERCENT}%" --vm-keep --timeout "${DURATION}s" --metrics-brief ;;
-        disco)   stress-ng --hdd 2 --hdd-bytes 1g --hdd-opts direct --temp-path "$DISK_TMP" --timeout "${DURATION}s" --metrics-brief ;;
-        red)     stress-ng --sock 2 --timeout "${DURATION}s" --metrics-brief ;;
+        memory)  stress-ng --vm 1 --vm-bytes "${MEM_PERCENT}%" --vm-keep --timeout "${DURATION}s" --metrics-brief ;;
+        disk)    stress-ng --hdd 2 --hdd-bytes 1g --hdd-opts direct --temp-path "$DISK_TMP" --timeout "${DURATION}s" --metrics-brief ;;
+        network) stress-ng --sock 2 --timeout "${DURATION}s" --metrics-brief ;;
     esac
 }
 
