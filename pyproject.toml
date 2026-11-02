@@ -22,3 +22,7 @@ Repository = "https://github.com/SeanBol222/pca-telemetry-linux"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
