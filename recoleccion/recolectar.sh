@@ -16,6 +16,8 @@
 #   -p SECONDS   pause between scenarios        (default: 60)
 #   -m PERCENT   memory used by "memoria"       (default: 75)
 #   -o DIR       output directory               (default: <repo>/data/raw)
+#   -t DIR       scratch dir for "disco"; must be on a real disk, not tmpfs
+#                                               (default: <repo>/.stress-tmp)
 #   -h           show this help
 #
 # Example (quick test, 60 s per scenario):
@@ -34,19 +36,21 @@ INTERVAL=1
 PAUSE=60
 MEM_PERCENT=75
 OUTDIR="$REPO_ROOT/data/raw"
+DISK_TMP="$REPO_ROOT/.stress-tmp"
 ALL_SCENARIOS=(reposo cpu memoria disco red)
 
 usage() {
-    sed -n '2,22p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+    sed -n '2,24p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
 }
 
-while getopts ":d:i:p:m:o:h" opt; do
+while getopts ":d:i:p:m:o:t:h" opt; do
     case "$opt" in
         d) DURATION="$OPTARG" ;;
         i) INTERVAL="$OPTARG" ;;
         p) PAUSE="$OPTARG" ;;
         m) MEM_PERCENT="$OPTARG" ;;
         o) OUTDIR="$OPTARG" ;;
+        t) DISK_TMP="$OPTARG" ;;
         h) usage; exit 0 ;;
         :) echo "Error: option -$OPTARG requires a value." >&2; exit 1 ;;
         *) echo "Error: unknown option -$OPTARG." >&2; usage; exit 1 ;;
@@ -99,6 +103,17 @@ if $needs_stress; then
 fi
 
 mkdir -p "$OUTDIR"
+
+# The disk load needs persistent storage: on tmpfs (e.g. /tmp on Debian 13)
+# the writes stay in RAM and the disk metrics remain at zero.
+if [[ " ${SCENARIOS[*]} " == *" disco "* ]]; then
+    mkdir -p "$DISK_TMP"
+    fstype="$(df --output=fstype "$DISK_TMP" | tail -n 1 | tr -d ' ')"
+    if [[ "$fstype" == "tmpfs" || "$fstype" == "ramfs" ]]; then
+        echo "Error: $DISK_TMP is on $fstype; use -t with a directory on a real disk." >&2
+        exit 1
+    fi
+fi
 RUN_LOG="$OUTDIR/run_log.csv"
 SPECS="$OUTDIR/server_specs.txt"
 
@@ -141,7 +156,7 @@ run_load() {
         reposo)  sleep "$DURATION" ;;
         cpu)     stress-ng --cpu 0 --timeout "${DURATION}s" --metrics-brief ;;
         memoria) stress-ng --vm 1 --vm-bytes "${MEM_PERCENT}%" --vm-keep --timeout "${DURATION}s" --metrics-brief ;;
-        disco)   stress-ng --hdd 2 --hdd-bytes 1g --temp-path "$OUTDIR" --timeout "${DURATION}s" --metrics-brief ;;
+        disco)   stress-ng --hdd 2 --hdd-bytes 1g --hdd-opts direct --temp-path "$DISK_TMP" --timeout "${DURATION}s" --metrics-brief ;;
         red)     stress-ng --sock 2 --timeout "${DURATION}s" --metrics-brief ;;
     esac
 }

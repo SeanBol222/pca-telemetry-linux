@@ -21,7 +21,7 @@ controlled and reproducible loads.
 | `reposo`  | Baseline: server without induced load    | `sleep <duration>`                                            |
 | `cpu`     | Saturate every CPU core                  | `stress-ng --cpu 0`                                           |
 | `memoria` | Occupy most of the RAM (may reach swap)  | `stress-ng --vm 1 --vm-bytes <m>% --vm-keep`                  |
-| `disco`   | Intensive disk reads and writes          | `stress-ng --hdd 2 --hdd-bytes 1g`                            |
+| `disco`   | Intensive disk reads and writes          | `stress-ng --hdd 2 --hdd-bytes 1g --hdd-opts direct`          |
 | `red`     | Intensive socket traffic over loopback   | `stress-ng --sock 2`                                          |
 
 Notes:
@@ -29,8 +29,11 @@ Notes:
 - `--cpu 0` starts one worker per online CPU.
 - `memoria` uses 75 % of the available memory by default (`-m`, max. 95).
   High values can make the server slow or trigger the OOM killer.
-- `disco` writes temporary files inside the output directory; `stress-ng`
-  removes them when it finishes.
+- `disco` writes temporary files in `.stress-tmp/` (option `-t`) with direct
+  I/O (`O_DIRECT`), so the writes reach the disk instead of staying in the page
+  cache. The directory **must not be on tmpfs**: on Debian 13 `/tmp` is tmpfs
+  and the disk metrics would stay at zero. The script stops with an error in
+  that case. `stress-ng` removes the files when it finishes.
 - `red` generates traffic on the `lo` interface, so it does not saturate the
   office network.
 
@@ -43,6 +46,7 @@ Notes:
 | `-p`   | Pause between scenarios (s)     | `60`             |
 | `-m`   | Memory for `memoria` (%)        | `75`             |
 | `-o`   | Output directory                | `data/raw`       |
+| `-t`   | Scratch directory for `disco`   | `.stress-tmp`    |
 
 With the defaults, a full run takes about 2 h 34 min (5 × 30 min + 4 × 1 min)
 and produces 1800 samples per scenario (9000 in total).

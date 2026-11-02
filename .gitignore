@@ -18,3 +18,6 @@ data/raw/**/sa[0-9]*
 .idea/
 *.swp
 .DS_Store
+
+# Scratch files of the disk load (stress-ng --hdd)
+.stress-tmp/
