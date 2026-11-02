@@ -1,0 +1,4 @@
+method,n_features,accuracy_mean,accuracy_std,n_folds
+all_metrics,27,1.0,0.0,5
+pca,5,1.0,0.0,5
+correlation_subset,11,1.0,0.0,5

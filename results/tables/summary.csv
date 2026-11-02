@@ -1,0 +1,13 @@
+result,value
+metrics_P,27.0
+components_k,5.0
+reduction_k_over_P,0.18518518518518517
+cumulative_variance,0.9062783084757642
+reconstruction_error_k,0.30613998681034055
+pca_error_same_dim_as_filter,0.0073386401454049515
+filter_error,0.018809810710713203
+accuracy_all_metrics,1.0
+accuracy_pca,1.0
+silhouette_all_metrics,0.7756301057393618
+silhouette_pca,0.8593850028408954
+ari_pca,1.0

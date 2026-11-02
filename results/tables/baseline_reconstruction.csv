@@ -1,0 +1,3 @@
+method,k,relative_error
+pca,11,0.0073386401454049515
+correlation_filter(|r|>0.9),11,0.018809810710713203
