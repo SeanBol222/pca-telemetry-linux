@@ -12,7 +12,7 @@
 # CSV files use ";" as separator and a "timestamp" column in Unix epoch (UTC).
 #
 # Usage:
-#   ./exportar_csv.sh [-i DIR]
+#   ./export_csv.sh [-i DIR]
 #
 # Options:
 #   -i DIR   directory with one folder per scenario (default: <repo>/data/raw)
@@ -81,7 +81,7 @@ for scenario_dir in "$INDIR"/*/; do
 done
 
 if (( found == 0 )); then
-    echo "No .sa files found in $INDIR/<scenario>/. Run ./recoleccion/recolectar.sh first." >&2
+    echo "No .sa files found in $INDIR/<scenario>/. Run ./collection/collect.sh first." >&2
     exit 1
 fi
 

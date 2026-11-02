@@ -55,17 +55,17 @@ and produces 1800 samples per scenario (9000 in total).
 
 ```bash
 # 1. Quick test: 60 s per scenario
-./recoleccion/recolectar.sh -d 60 -p 10 -o /tmp/test_raw
-./recoleccion/exportar_csv.sh -i /tmp/test_raw
+./collection/collect.sh -d 60 -p 10 -o /tmp/test_raw
+./collection/export_csv.sh -i /tmp/test_raw
 
 # 2. Full collection (run it inside tmux or screen)
-./recoleccion/recolectar.sh
+./collection/collect.sh
 
 # 3. Export the binary files to CSV
-./recoleccion/exportar_csv.sh
+./collection/export_csv.sh
 ```
 
-Specific scenarios can be run alone, for example `./recoleccion/recolectar.sh cpu red`.
+Specific scenarios can be run alone, for example `./collection/collect.sh cpu red`.
 
 ## Output
 

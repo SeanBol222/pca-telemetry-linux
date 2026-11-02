@@ -6,7 +6,7 @@
 # waits for sar to finish and pauses before the next scenario.
 #
 # Usage:
-#   ./recolectar.sh [options] [scenario ...]
+#   ./collect.sh [options] [scenario ...]
 #
 # Scenarios: reposo cpu memoria disco red (default: all, in that order)
 #
@@ -21,7 +21,7 @@
 #   -h           show this help
 #
 # Example (quick test, 60 s per scenario):
-#   ./recolectar.sh -d 60 -p 10
+#   ./collect.sh -d 60 -p 10
 
 set -euo pipefail
 
@@ -204,4 +204,4 @@ for scenario in "${SCENARIOS[@]}"; do
     fi
 done
 
-echo "Collection finished. Next step: ./recoleccion/exportar_csv.sh"
+echo "Collection finished. Next step: ./collection/export_csv.sh"
