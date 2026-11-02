@@ -56,6 +56,8 @@ _TEXT = {
         "time": "Tiempo (s)",
         "original": "Original",
         "reconstructed": "Reconstruida",
+        "curve_title": "Error de reconstrucción según el número de componentes",
+        "curve_error": "Error relativo de reconstrucción (%)",
         "cmp_title": "Comparación de métodos",
         "method": "Método",
         "scenarios": {"idle": "Reposo", "cpu": "CPU", "memory": "Memoria",
@@ -82,6 +84,8 @@ _TEXT = {
         "time": "Time (s)",
         "original": "Original",
         "reconstructed": "Reconstructed",
+        "curve_title": "Reconstruction error versus number of components",
+        "curve_error": "Relative reconstruction error (%)",
         "cmp_title": "Method comparison",
         "method": "Method",
         "scenarios": {"idle": "Idle", "cpu": "CPU", "memory": "Memory",
@@ -193,6 +197,25 @@ def plot_reconstruction(original: pd.Series, reconstructed: pd.Series, metric: s
     ax.set_ylabel(f"{metric} ({unit})" if unit else metric)
     ax.set_title(t["rec_title"].format(metric, k))
     ax.legend()
+    fig.tight_layout()
+    return fig
+
+
+def plot_reconstruction_curve(curve: pd.DataFrame, k: int | None = None,
+                              lang: str = "es") -> Figure:
+    """Relative reconstruction error for every k, optionally marking one k."""
+    t = _t(lang)
+    fig, ax = plt.subplots(figsize=(8, 4.5))
+    ax.plot(curve["k"], curve["relative_error"] * 100, color="#4c72b0", marker="o")
+    if k is not None:
+        error = float(curve.loc[curve["k"] == k, "relative_error"].iloc[0]) * 100
+        ax.axvline(k, color="gray", linestyle="--", label=f"k = {k} ({error:.1f} %)")
+        ax.legend()
+    ax.set_xticks(curve["k"])
+    ax.tick_params(axis="x", labelsize=8)
+    ax.set_xlabel(t["component"])
+    ax.set_ylabel(t["curve_error"])
+    ax.set_title(t["curve_title"])
     fig.tight_layout()
     return fig
 
