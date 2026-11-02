@@ -21,3 +21,4 @@ data/raw/**/sa[0-9]*
 
 # Scratch files of the disk load (stress-ng --hdd)
 .stress-tmp/
+.pytest_cache/
