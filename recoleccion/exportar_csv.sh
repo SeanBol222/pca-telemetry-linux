@@ -20,6 +20,10 @@
 
 set -euo pipefail
 
+# Use the C locale so numbers keep a dot as decimal separator and the
+# command output (lscpu, free, ...) is in English, whatever the system language.
+export LC_ALL=C
+
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 INDIR="$REPO_ROOT/data/raw"
 
