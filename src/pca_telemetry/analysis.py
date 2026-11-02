@@ -6,16 +6,18 @@ Notation (rows = sampling instants, columns = metrics):
     Z    projection Z = Xz W_k, N x k
     X^   reconstruction X^ = Z W_k^T
 
-The module also contains the baselines used to judge whether the reduced
-space keeps the behavior of the server.
+The module also contains the baselines and the clustering comparison used to
+judge whether the reduced space keeps the behavior of the server.
 """
 
 from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import adjusted_rand_score, silhouette_score
 from sklearn.model_selection import PredefinedSplit, cross_val_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
@@ -244,4 +246,54 @@ def compare_classifiers(
                 "n_folds": len(scores),
             }
         )
+    return pd.DataFrame(rows)
+
+
+# --------------------------------------------------------------------------
+# Clustering: is the behavior still recognizable in the reduced space?
+# --------------------------------------------------------------------------
+
+def clustering_scores(
+    features: pd.DataFrame | np.ndarray,
+    y: pd.Series,
+    n_clusters: int | None = None,
+    sample_size: int | None = 5000,
+    random_state: int = 0,
+) -> dict[str, float]:
+    """K-Means on ``features`` evaluated with Silhouette and Adjusted Rand Index.
+
+    Silhouette (-1 to 1) measures how separated the clusters are without using
+    the labels. ARI (about 0 = random, 1 = perfect) measures how well the
+    clusters match the real load scenarios.
+    """
+    n_clusters = int(pd.Series(y).nunique()) if n_clusters is None else n_clusters
+    labels = KMeans(n_clusters=n_clusters, n_init=10, random_state=random_state).fit_predict(features)
+    sample = None if sample_size is None or len(labels) <= sample_size else sample_size
+    return {
+        "silhouette": float(
+            silhouette_score(features, labels, sample_size=sample, random_state=random_state)
+        ),
+        "adjusted_rand_index": float(adjusted_rand_score(y, labels)),
+    }
+
+
+def compare_clustering(
+    Xz: pd.DataFrame,
+    pca: PCA,
+    k: int,
+    y: pd.Series,
+    n_clusters: int | None = None,
+    random_state: int = 0,
+) -> pd.DataFrame:
+    """Clustering quality with all standardized metrics versus k components.
+
+    Same comparison as Lee et al. (2023): K-Means with and without PCA.
+    """
+    rows = []
+    for method, features in (
+        ("all_metrics", Xz),
+        ("pca", project(Xz, pca, k)),
+    ):
+        scores = clustering_scores(features, y, n_clusters, random_state=random_state)
+        rows.append({"method": method, "n_features": features.shape[1], **scores})
     return pd.DataFrame(rows)
